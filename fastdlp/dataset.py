@@ -9,6 +9,7 @@ import torchvision.transforms as transforms
 import zarr
 from torch.utils.data import Dataset
 from PIL import Image
+import torchvision.io as tvio
 
 from fastdlp.utils.transforms import euler_to_rot_6d
 from fastdlp.utils.data import convert_delta_action
@@ -325,7 +326,9 @@ class SequenceDataset(Dataset):
         images = []
         for key in self.metadata["camera_keys"]:
             image_path = os.path.join(image_dir, key, f"{step_idx:05d}.jpg")
-            image = Image.open(image_path)
+            # image = Image.open(image_path)
+            image = tvio.read_file(image_path)
+            image = tvio.decode_jpeg(image, mode=tvio.ImageReadMode.RGB)
             if "wrist" in image_path:
                 # use no_aug_vision_transform for wrist camera
                 image = self.no_aug_vision_transform(image)
